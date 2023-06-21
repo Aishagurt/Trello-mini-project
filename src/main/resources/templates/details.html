@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th = "http://www.thymeleaf.org">
+<head th:insert="head.html">
+    <title>Trello</title>
+</head>
+<body>
+<div class="container-fluid">
+    <div th:insert="navbar.html"></div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-4">
+            <h2 th:text="${folder.getName()}"></h2>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-6 d-flex flex-wrap l">
+            <div class="category bg-primary text-white p-2 m-1 d-flex align-items-center position-relative" th:each="category : ${categories}">
+                <p class="flex-grow-1" th:text="${category.name}"></p>
+                <form th:action="@{/deleteCategory}" th:object="${category}" method="post">
+                    <input type="hidden" th:value="${category.getId()}" name="categoryId">
+                    <input type="hidden" th:value="${folder.getId()}" name="folderId">
+                    <button type="submit" class="btn btn-danger" style="border: none; background: none;">&times;</button>
+                </form>
+            </div>
+
+            <a class="btn font-weight-bold text-dark mt-4 m-lg-4" data-toggle="modal" data-target="#addCategory">+ Add Category</a>
+
+            <div class="modal fade" id="addCategory" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add Category</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="border: none; background: none;">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form th:action="@{'/addCategory'}" method="post" id="addCategoryForm">
+                                <input type="hidden" name="folderId" th:value="${folder.getId()}">
+                                <div class="form-group">
+                                    <label for="CategoryName">Title:</label>
+                                    <input type="text" class="form-control" id="CategoryName" name="CategoryName" placeholder="Name">
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" form="addCategoryForm" class="btn btn-primary">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+<a class="btn font-weight-bold text-dark mt-4 m-lg-4" data-toggle="modal" data-target="#addFolderModal">+ Add task</a>
+
+<div class="modal fade" id="addFolderModal" tabindex="-1" role="dialog" aria-labelledby="addFolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addFolderModalLabel">Add Task</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="border: none; background: none;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{'/addTask'}" method="post" id="addTaskForm">
+                    <input type="hidden" name="folderId" th:value="${folder.getId()}">
+                    <div class="form-group">
+                        <label for="TaskName">Title:</label>
+                        <input type="text" class="form-control" id="TaskName" name="title" placeholder="Title">
+                    </div>
+                    <div class="form-group">
+                        <label for="TaskDescrp">Description:</label>
+                        <textarea type="text" class="form-control" id="TaskDescrp" name="description" placeholder="Description"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" form="addTaskForm" class="btn btn-primary">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="container mt-3">
+    <div class="col-9">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Task Name</th>
+                <th>Status</th>
+                <th>Details</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="task : ${tasks}">
+                <td th:text="${task.getId()}"></td>
+                <td th:text="${task.getTitle()}"></td>
+                <td th:switch="${task.getStatus()}">
+                    <span th:case="0" th:text="'TO DO'" th:style="'color: blue;'"></span>
+                    <span th:case="1" th:text="'IN TEST'" th:style="'color: orange;'"></span>
+                    <span th:case="2" th:text="'DONE'" th:style="'color: green;'"></span>
+                    <span th:case="3" th:text="'FAILED'" th:style="'color: red;'"></span>
+
+                </td>
+                <td>
+                    <a class="btn btn-primary" data-toggle="modal" data-target="#viewTask">View more</a>
+
+                    <div class="modal fade" id="viewTask" tabindex="-1" role="dialog"aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Task</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="border: none; background: none;">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form th:action="@{'/updateTask'}" method="post" id="viewTaskForm">
+                                        <input type="hidden" name="folderId" th:value="${folder.getId()}">
+                                        <input type="hidden" name="taskId" th:value="${task.getId()}">
+                                        <div class="form-group">
+                                            <label for="Title">Title:</label>
+                                            <input type="text" class="form-control" id="Title" name="title" th:value="${task.getTitle()}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="Description">Description:</label>
+                                            <textarea type="text" class="form-control" id="Description" name="description" th:text="${task.getDescription()}"></textarea>
+                                        </div>
+                                        <div class="form-group mt-2">
+                                            <select class="form-select" name="status" th:value="${task.getStatus()}">
+                                                <option class="bg-primary text-white" value="0">To do</option>
+                                                <option class="bg-warning text-white" value="1">In test</option>
+                                                <option class="bg-success text-white" value="2">Done</option>
+                                                <option class="bg-danger text-white" value="3">Failed</option>
+                                            </select>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <form th:action="@{'/deleteTask'}" method="post">
+                                        <input type="hidden" th:value="${task.getId()}" name="taskId">
+                                        <input type="hidden" th:value="${folder.getId()}" name="folderId">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                    <button type="submit" form="viewTaskForm" class="btn btn-success">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
